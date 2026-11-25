@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المهمة 01 - آلة حاسبة تفاعلية</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, Arial, sans-serif; }
+        body { background-color: #131622; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px; }
+        
+        .top-header { width: 100%; max-width: 800px; text-align: right; border-bottom: 2px solid #f5b014; padding-bottom: 12px; margin-bottom: 25px; }
+        .top-header h1 { color: #f5b014; font-size: 1.4rem; margin-bottom: 4px; }
+        .top-header p { color: #9ca3af; font-size: 0.9rem; }
+
+        .calculator { background-color: #1c2030; border: 1px solid #2d3348; border-radius: 16px; padding: 20px; width: 100%; max-width: 340px; box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+        .calc-title { text-align: center; color: #f5b014; font-size: 0.85rem; letter-spacing: 1px; margin-bottom: 14px; font-weight: bold; }
+        
+        .display { background-color: #11141f; border: 1px solid #2a3045; border-radius: 10px; padding: 18px 15px; font-size: 2rem; font-weight: bold; color: #fff; margin-bottom: 18px; overflow-x: auto; direction: ltr; min-height: 70px; display: flex; align-items: center; justify-content: flex-end; }
+        
+        .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; direction: ltr; }
+        button { background-color: #252a3d; color: #fff; border: 1px solid #323850; border-radius: 10px; padding: 15px; font-size: 1.15rem; font-weight: bold; cursor: pointer; transition: 0.15s; }
+        button:hover { background-color: #31374f; }
+        button:active { transform: scale(0.96); }
+        
+        .btn-danger { background-color: #3a1f28; color: #f87171; border-color: #5c2b38; }
+        .btn-danger:hover { background-color: #4d2632; }
+        .btn-op { background-color: #332d21; color: #f5b014; border-color: #52462e; }
+        .btn-op:hover { background-color: #453c2a; }
+        .span-2 { grid-column: span 2; }
+        .btn-eq { grid-column: span 2; background-color: #f5b014; color: #131622; border: none; font-size: 1.3rem; }
+        .btn-eq:hover { background-color: #ffbe26; }
+
+        .shortcuts-box { background-color: #1c2030; border: 1px solid #2d3348; border-radius: 12px; padding: 15px 20px; width: 100%; max-width: 650px; margin-top: 25px; text-align: right; }
+        .shortcuts-box h3 { color: #f5b014; font-size: 0.95rem; margin-bottom: 6px; }
+        .shortcuts-box p { color: #9ca3af; font-size: 0.85rem; line-height: 1.6; }
+        .shortcuts-box span { background: #252a3d; color: #e5e7eb; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+
+        footer { width: 100%; text-align: center; color: #6b7280; font-size: 0.85rem; margin-top: 25px; padding-top: 12px; border-top: 1px solid #1f2436; }
+    </style>
+</head>
+<body>
+
+    <div class="top-header">
+        <h1>المهمة 01 - آلة حاسبة تفاعلية</h1>
+        <p>الأسبوع 08 — أساسيات JavaScript</p>
+    </div>
+
+    <div class="calculator">
+        <div class="calc-title">آلة حاسبة بلغة JAVASCRIPT</div>
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button class="btn-danger" onclick="clearAll()">C</button>
+            <button class="btn-danger" onclick="backspace()">⌫</button>
+            <button class="btn-op" onclick="appendOp('%')">%</button>
+            <button class="btn-op" onclick="appendOp('/')">÷</button>
+
+            <button onclick="appendNum('7')">7</button>
+            <button onclick="appendNum('8')">8</button>
+            <button onclick="appendNum('9')">9</button>
+            <button class="btn-op" onclick="appendOp('*')">×</button>
+
+            <button onclick="appendNum('4')">4</button>
+            <button onclick="appendNum('5')">5</button>
+            <button onclick="appendNum('6')">6</button>
+            <button class="btn-op" onclick="appendOp('-')">−</button>
+
+            <button onclick="appendNum('1')">1</button>
+            <button onclick="appendNum('2')">2</button>
+            <button onclick="appendNum('3')">3</button>
+            <button class="btn-op" onclick="appendOp('+')">+</button>
+
+            <button class="span-2" onclick="appendNum('0')">0</button>
+            <button onclick="appendDot()">.</button>
+            <div></div>
+
+            <button class="btn-eq" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <div class="shortcuts-box">
+        <h3>اختصارات لوحة المفاتيح</h3>
+        <p>استخدم <span>0-9</span> لإدخال الأرقام، و <span>/</span> <span>*</span> <span>-</span> <span>+</span> للعمليات الحسابية، و <span>Enter</span> أو <span>=</span> لحساب النتيجة، و <span>Escape</span> للمسح، و <span>Backspace</span> لحذف آخر رقم.</p>
+    </div>
+
+    <footer>جامعة الأقصى — تصميم وإدارة مواقع الإنترنت 1</footer>
+
+    <script>
+        let current = '0';
+        const display = document.getElementById('display');
+
+        function updateDisplay() {
+            display.textContent = current.replace(/\*/g, '×').replace(/\//g, '÷');
+        }
+
+        function appendNum(num) {
+            if (current === '0' || current === 'خطأ') current = num;
+            else current += num;
+            updateDisplay();
+        }
+
+        function appendDot() {
+            const parts = current.split(/[\+\-\*\/\%]/);
+            if (!parts[parts.length - 1].includes('.')) {
+                current += '.';
+                updateDisplay();
+            }
+        }
+
+        function appendOp(op) {
+            if (current === 'خطأ') current = '0';
+            if (/[\+\-\*\/\%]$/.test(current)) {
+                current = current.slice(0, -1) + op;
+            } else {
+                current += op;
+            }
+            updateDisplay();
+        }
+
+        function clearAll() {
+            current = '0';
+            updateDisplay();
+        }
+
+        function backspace() {
+            if (current === 'خطأ' || current.length <= 1) current = '0';
+            else current = current.slice(0, -1);
+            updateDisplay();
+        }
+
+        function calculate() {
+            try {
+                let expr = current.replace(/%/g, '/100');
+                let res = eval(expr);
+                if (!isFinite(res) || isNaN(res)) current = 'خطأ';
+                else current = String(Number(res.toFixed(8)));
+            } catch {
+                current = 'خطأ';
+            }
+            updateDisplay();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') appendNum(e.key);
+            else if (e.key === '.') appendDot();
+            else if (['+', '-', '*', '/', '%'].includes(e.key)) { e.preventDefault(); appendOp(e.key); }
+            else if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); calculate(); }
+            else if (e.key === 'Escape') clearAll();
+            else if (e.key === 'Backspace') backspace();
+        });
+    </script>
+</body>
+</html>
